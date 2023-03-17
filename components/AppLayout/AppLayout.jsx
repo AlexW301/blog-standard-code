@@ -45,7 +45,7 @@ export default function AppLayout({children}) {
           )}
         </div>
       </div>
-      <div className="">{children}</div>
+      {children}
     </div>
   );
 }
