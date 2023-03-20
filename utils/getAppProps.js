@@ -21,6 +21,9 @@ export const getAppProps = async (ctx) => {
     .find({
       userId: user._id,
     })
+    .sort({
+      created: -1,
+    })
     .toArray();
 
   return {
@@ -30,5 +33,6 @@ export const getAppProps = async (ctx) => {
       created: created.toString(),
       ...rest,
     })),
+    postId: ctx.params?.postId || null,
   };
 };
