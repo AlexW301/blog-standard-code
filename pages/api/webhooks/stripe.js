@@ -1,10 +1,10 @@
-import Cors from "micro-cors";
-import stripeInit from "stripe";
-import verifyStripe from "@webdeveducation/next-verify-stripe";
-import clientPromise from "../../../lib/mongodb";
+import Cors from 'micro-cors';
+import stripeInit from 'stripe';
+import verifyStripe from '@webdeveducation/next-verify-stripe';
+import clientPromise from '../../../lib/mongodb';
 
 const cors = Cors({
-  allowMethods: ["POST", "HEAD"],
+  allowMethods: ['POST', 'HEAD'],
 });
 
 export const config = {
@@ -14,11 +14,10 @@ export const config = {
 };
 
 const stripe = stripeInit(process.env.STRIPE_SECRET_KEY);
-
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 const handler = async (req, res) => {
-  if (req.method === "POST") {
+  if (req.method === 'POST') {
     let event;
     try {
       event = await verifyStripe({
@@ -27,17 +26,20 @@ const handler = async (req, res) => {
         endpointSecret,
       });
     } catch (e) {
-      console.log("ERROR", e);
+      console.log('ERROR: ', e);
     }
+
     switch (event.type) {
-      case "payment_intent.succeeded": {
+      case 'payment_intent.succeeded': {
         const client = await clientPromise;
-        const db = client.db("BlogStandard");
+        const db = client.db('BlogStandard');
 
         const paymentIntent = event.data.object;
         const auth0Id = paymentIntent.metadata.sub;
 
-        const userProfile = await db.collection("users").updateOne(
+        console.log('AUTH 0 ID: ', paymentIntent);
+
+        const userProfile = await db.collection('users').updateOne(
           {
             auth0Id,
           },
@@ -46,7 +48,7 @@ const handler = async (req, res) => {
               availableTokens: 10,
             },
             $setOnInsert: {
-              auth0Id: user.sub,
+              auth0Id,
             },
           },
           {
@@ -55,9 +57,9 @@ const handler = async (req, res) => {
         );
       }
       default:
-        console.log("UNHANDLED EVENT", event.type);
+        console.log('UNHANDLED EVENT: ', event.type);
     }
-    res.status(200).json({recieved: true});
+    res.status(200).json({ received: true });
   }
 };
 
