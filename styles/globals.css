@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  a:hover {
+    @apply underline;
+  }
+
   h1,
   h2,
   h3,
@@ -51,6 +55,6 @@
 
 @layer components {
   .btn {
-    @apply block w-full px-4 py-2 font-bold tracking-wider text-center text-white uppercase transition-colors bg-green-500 rounded-md cursor-pointer hover:bg-green-600;
+    @apply disabled:bg-green-200 disabled:cursor-not-allowed hover:no-underline block w-full px-4 py-2 font-bold tracking-wider text-center text-white uppercase transition-colors bg-green-500 rounded-md cursor-pointer hover:bg-green-600;
   }
 }
