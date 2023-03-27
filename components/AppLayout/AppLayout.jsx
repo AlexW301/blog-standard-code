@@ -7,15 +7,21 @@ import {faCoins} from "@fortawesome/free-solid-svg-icons";
 import Logo from "../Logo/Logo";
 import PostsContext from "../../context/postsContext";
 
-export default function AppLayout({children, availableTokens, posts: postsFromSSR, postId}) {
+export default function AppLayout({children, availableTokens, posts: postsFromSSR, postId, postCreated}) {
   const {user} = useUser();
 
-  const {setPostsFromSSR, posts} = useContext(PostsContext);
+  const {setPostsFromSSR, posts, getPosts, noMorePosts} = useContext(PostsContext);
 
   useEffect(() => {
     setPostsFromSSR(postsFromSSR);
-  }, [postsFromSSR, setPostsFromSSR]);
-  
+    if (postId) {
+      const exists = postsFromSSR.find((post) => post._id === postId);
+      if (!exists) {
+        getPosts({getNewerPosts: true, lastPostDate: postCreated});
+      }
+    }
+  }, [postsFromSSR, setPostsFromSSR, postId, getPosts]);
+
   return (
     <div className="grid grid-cols-[300px_1fr] h-screen max-h-screen">
       <div className="flex flex-col overflow-hidden text-white">
@@ -43,7 +49,16 @@ export default function AppLayout({children, availableTokens, posts: postsFromSS
               {post.topic}
             </Link>
           ))}
-          <div className="mt-4 text-sm text-center cursor-pointer hover:underline text-slate-400">Load more posts</div>
+          {!noMorePosts && (
+            <div
+              onClick={() => {
+                getPosts({lastPostDate: posts[posts.length - 1].created});
+              }}
+              className="mt-4 text-sm text-center cursor-pointer hover:underline text-slate-400"
+            >
+              Load more posts
+            </div>
+          )}
         </div>
         <div className="flex items-center h-20 gap-2 px-2 border-t bg-cyan-800 border-t-black/50">
           {!!user ? (
